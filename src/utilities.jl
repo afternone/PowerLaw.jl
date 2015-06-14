@@ -18,6 +18,12 @@ function bisearch(mn::Int, mx::Int, func::Function, target::Float64)
     end
 end
 
+pdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [pdf(d, x) for x in X]
+ccdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [ccdf(d, x) for x in X]
+cdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [cdf(d, x) for x in X]
+logpdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [logpdf(d, x) for x in X]
+logccdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [logccdf(d, x) for x in X]
+logcdf{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}) = [logcdf(d, x) for x in X]
 
 # Loglikelihood ratio test
 function lrt{T<:Real}(X::AbstractArray{T}, d1::UnivariateDistribution, d2::UnivariateDistribution)
@@ -73,7 +79,7 @@ end
 
 
 # Search for the best fit parameters for the target distribution on this data, may be take a while
-function findxmin{T<:Real}(DistributionType::Type{UnivariateDistribution}, x::Vector{T}, xmin=minimum(x), xmax=maximum(x); return_all::Bool=false)
+function findxmin{T<:Real, DType<:UnivariateDistribution}(DistributionType::Type{DType}, x::Vector{T}, xmin=minimum(x), xmax=maximum(x); return_all::Bool=false)
     D(β) = ks(x, fit_mle(DistributionType, x, β))
     xmins = x[xmin .<= x .<= xmax]
     xmins = unique(xmins)
@@ -111,10 +117,7 @@ end
 
 # p-value,  p_eps is the required precision, default 0.01
 #For a given precision p_eps, plfit will use 1 / (4 * eps^2) iterations, so be prepared for a long wait when eps is small
-function pvalue{T<:Real}(DistributionType::Type{UnivariateDistribution}, X::AbstractArray{T}, p_eps::T=0.01)
-    n = length(X)
-    β = findxmin(DistributionType, X)[1]
-    d = fit_mle(DistributionType, X, β)
+function pvalue{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}, p_eps::T=0.01)
     D = ks(X, d)
     cnt = 0
     N = int(0.25/p_eps/p_eps)

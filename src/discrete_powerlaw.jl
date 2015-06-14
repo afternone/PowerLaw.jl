@@ -86,7 +86,7 @@ end
 
 
 # Fit model
-function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(x)[1]; return_all::Bool=false, estimate::Bool=false)
+function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(DiscretePowerLaw, x)[1]; return_all::Bool=false, estimate::Bool=false)
     x = x[x.>=β]
     n = float(length(x))
     if estimate
@@ -98,9 +98,9 @@ function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(x)
         end
     else
         L(α) = n*log(zeta(α, β)) + α*sum(log(x))
-        opt = Optim.optimize(L, 1.0, 1000.0)
+        opt = optimize(L, 1.0, 10.0)
         α = opt.minimum
-        α != 1000 || warn("Exponent too large, results incredible!")
+        #α != 10 || warn("Exponent too large (α>10), results incredible!")
         if return_all
             f(x) = zeta(x, β)
             σ = 1/sqrt(n*(f''(α)/f(α) - (f'(α)/f(α))^2))

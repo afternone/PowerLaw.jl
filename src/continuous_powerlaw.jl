@@ -90,7 +90,7 @@ rand(d::ContinuousPowerLaw) = d.β * exp(randexp() / (d.α -1.0))
 
 #### Fit model
 
-function fit_mle{T<:Real}(::Type{ContinuousPowerLaw}, x::Vector{T}, β=findxmin(ContinuousPowerLaw, x); return_all::Bool=false)
+function fit_mle{T<:Real}(::Type{ContinuousPowerLaw}, x::Vector{T}, β=findxmin(ContinuousPowerLaw, x)[1]; return_all::Bool=false)
     x = x[x.>=β]
     n = length(x)
     α = 1.0 + n/(sum(log(x)) - n*log(β))

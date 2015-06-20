@@ -86,7 +86,7 @@ end
 
 
 # Fit model
-function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(DiscretePowerLaw, x)[1]; return_all::Bool=false, estimate::Bool=false)
+function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(DiscretePowerLaw, x)[1]; return_all::Bool=false, estimate::Bool=true)
     x = x[x.>=β]
     n = float(length(x))
     if estimate
@@ -97,7 +97,8 @@ function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(Di
             DiscretePowerLaw(α, β)
         end
     else
-        L(α) = n*log(zeta(α, β)) + α*sum(log(x))
+        c = sum(log(x))
+        L(α) = n*log(zeta(α, β)) + α*c
         α = bfgs(2.0, L)
         if return_all
             f(x) = zeta(x, β)

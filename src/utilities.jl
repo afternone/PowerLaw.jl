@@ -1,49 +1,64 @@
-function comute_gradient{T<:Real}(f::Function, x::{T}, h::{T}=1e-5)
+function compute_gradient(f::Function, x::Real, h::Real=1e-5)
     (f(x+h) - f(x-h))/2.0/h
 end
 
-function wolf_linesearch{T<:Real}(x0::{T}, z::{T}, f::Function, g::Function, alpha_init::{T}=1.0)
+function compute_hessian(f::Function, x::Real, h::Real=1e-5)
+  (f(x+h) - 2*f(x) + f(x-h))/h/h
+end
+
+function wolf_linesearch(x::Real, dk::Real, f::Function, λk::Real=1.0)
 
     # evaluate phi(0)
-    phi0 = f(x0)
+    phi0 = f(x)
 
     # evaluate phi'(0)
-    phi0_dash = z*g(f, x0)
+    phi0_dash = dk*compute_gradient(f, x)
 
-    alpha = alpha_init
     decrease_direction = true
 
     # 200 guesses
     for i=1:200
 
         # new guess for phi(alpha)
-        x_candidate = x0 + alpha*z
-        phi = f(x_candidate)
+        x = x + λk*dk
+        phi = f(x)
 
         # decrease condition invalid --> shrink interval
-        if phi > phi0 + 0.0001*alpha*phi0_dash
-            alpha *= 0.5
+        if phi > phi0 + 0.0001*λk*phi0_dash
+            λk *= 0.5
             decrease_direction = false
         else
 
             # valid decrease --> test strong wolfe condition
-            phi_dash = z*g(f, x_candidate)
+            phi_dash = dk*compute_gradient(f, x)
 
             # curvature condition invalid ?
             if phi_dash < 0.9 * phi0_dash || !decrease_direction
-                alpha *= 4.0
+                λk *= 4.0
             else
                 # both condition are valid --> we are happy
-                return alpha
+                return λk
             end
         end
     end
-    alpha
+    λk
 end
 
-function bfgs{T<:Real}(x::{T}, f::Function, g::Function)
-    x_old = x
-    while
+function bfgs(x::Real, f::Function, gktol::Real=1e-8, maxIter::Int=1000)
+    gk = compute_gradient(f, x)
+    Hk = compute_hessian(f, x)
+    iter = 1
+    while abs(gk) > gktol && iter < maxIter
+      iter += 1
+      dk = -gk/Hk
+      λk = wolf_linesearch(x, dk, f)
+      x = x + λk*dk
+      gk = compute_gradient(f, x)
+      Hk = compute_hessian(f, x)
+    end
+    x
+end
+
 
 function bisearch(mn::Int, mx::Int, func::Function, target::Float64)
     if func(mn) < target || func(mx) > target

@@ -2,12 +2,11 @@ module PowerLaw
 
 using Distributions
 using Compat
-import Optim.optimize
 import Base: scale, rand, minimum, maximum
 import Base: mean, median, quantile, var
 import StatsBase: kurtosis, skewness, entropy, mode, fit
 
-export 
+export
 	# distribution types
 	DiscretePowerLaw,
 	ContinuousPowerLaw,

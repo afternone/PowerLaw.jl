@@ -98,9 +98,7 @@ function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(Di
         end
     else
         L(α) = n*log(zeta(α, β)) + α*sum(log(x))
-        opt = optimize(L, 1.0, 10.0)
-        α = opt.minimum
-        #α != 10 || warn("Exponent too large (α>10), results incredible!")
+        α = bfgs(2.0, L)
         if return_all
             f(x) = zeta(x, β)
             σ = 1/sqrt(n*(f''(α)/f(α) - (f'(α)/f(α))^2))

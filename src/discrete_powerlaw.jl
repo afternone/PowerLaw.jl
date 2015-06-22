@@ -99,7 +99,9 @@ function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(Di
     else
         c = sum(log(x))
         L(α) = n*log(zeta(α, β)) + α*c
-        α = bfgs(2.0, L)
+        opt = optimize(L, [3.0], method=:bfgs)
+        obj.gr_converged || error("can not optimize log likehood")
+        α = obj.minimum
         if return_all
             f(x) = zeta(x, β)
             σ = 1/sqrt(n*(f''(α)/f(α) - (f'(α)/f(α))^2))

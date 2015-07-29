@@ -3,8 +3,8 @@ immutable DiscretePowerLaw <: DiscreteUnivariateDistribution
     β::Int64
 
     function DiscretePowerLaw(α::Real, β::Real)
-        (α > zero(α) && β > zero(β)) || error("DiscretePowerLaw: shape and scale must be positive")
-        @compat new(Float64(α), Int64(β))
+        (α > one(α) && β > zero(β)) || error("DiscretePowerLaw: must have shape > 1, scale > 0")
+        @compat new(float64(α), int64(β))
     end
 
     DiscretePowerLaw(α::Real) = DiscretePowerLaw(α, 1)
@@ -98,8 +98,8 @@ function fit_mle{T<:Real}(::Type{DiscretePowerLaw}, x::Vector{T}, β=findxmin(Di
         end
     else
         c = sum(log(x))
-        L(α) = n*log(zeta(α, β)) + α*c
-        opt = optimize(L, [3.0], method=:bfgs)
+        L(x) = x[1]>1 ? n*log(zeta(x[1], β)) + x[1]*c : Inf
+        opt = optimize(L, [3.0], method=:cg)
         obj.gr_converged || error("can not optimize log likehood")
         α = obj.minimum
         if return_all

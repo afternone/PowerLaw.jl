@@ -77,6 +77,15 @@ function ks{T<:Real}(X::AbstractArray{T}, d::UnivariateDistribution)
     max(δp, δn)
 end
 
+function ks{T<:Real}(X::AbstractArray{T}, Y::AbstractArray{T})
+    efx = eccdf(X)
+    efy = eccdf(Y)
+    XY = unique([X;Y])
+    δp = maximum(efx(XY) - efy(XY))
+    δn = -minimum(efx(XY) - efy(XY))
+    max(δp, δn)
+end
+
 
 # Search for the best fit parameters for the target distribution on this data, may be take a while
 function findxmin{T<:Real, DType<:UnivariateDistribution}(DistributionType::Type{DType}, x::Vector{T}, xmin=minimum(x), xmax=maximum(x); return_all::Bool=false)

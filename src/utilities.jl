@@ -126,7 +126,7 @@ end
 
 # p-value,  p_eps is the required precision, default 0.01
 #For a given precision p_eps, plfit will use 1 / (4 * eps^2) iterations, so be prepared for a long wait when eps is small
-function pvalue{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}, p_eps::T=0.01)
+function pvalue{T<:Real}(d::UnivariateDistribution, X::AbstractArray{T}, p_eps::Float64=0.01)
     D = ks(X, d)
     cnt = 0
     N = int(0.25/p_eps/p_eps)
